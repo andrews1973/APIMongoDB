@@ -1,0 +1,299 @@
+// ========================================
+// CONTROLADOR DE LA PÁGINA PRINCIPAL
+// ========================================
+
+// Exportamos la función getIndex para poder utilizarla
+// desde nuestro archivo publicRoutes.js donde la importaremos
+// req (request): contiene la información de la petición que recibimos del cliente.
+// res (response): nos permite enviar una respuesta al cliente.
+// Cuando recibimos una petición GET a "/", ejecutamos este controlador.
+// Indicamos que la petición ha sido procesada correctamente mediante el código de estado HTTP 200 (OK).
+// .json() envía una respuesta en formato JSON al cliente.
+export const getIndex = (req, res) => {
+  res.status(200).json({
+    ok: true,
+    mesg: "esto es el index desde la api",
+  });
+};
+
+// ========================================
+// CONTROLADOR PARA OBTENER PRODUCTOS
+// ========================================
+// aqui tambien habra un llamada al base de datos, traeme todos los productos ect
+// habra latencia y por tanto asysc y try catch
+// Esta función se ejecuta cuando recibimos una petición
+// GET a la ruta "/productos" Enviamos una respuesta HTTP 200 (OK).
+// Dentro de .json() como hemos comentado enviamos un objeto JavaScript
+// que Express convierte automáticamente a formato JSON.
+// Es Array con los productos (objetos) que queremos devolver al cliente, procedera de bd
+export const getProducts = async (req, res) => {
+  try {
+    res.status(200).json({
+      ok: true,
+      mesg: "esto es productos",
+      articulos: [
+        {
+          id: 1,
+          nombre: "articulo1",
+          descripcion: "des arti 1",
+        },
+        {
+          id: 2,
+          nombre: "articulo2",
+          descripcion: "des arti 2",
+        },
+      ],
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: true,
+      msg: "error del servidor siempre 500",
+    });
+  }
+};
+
+// ========================================
+// CONTROLADOR PARA OBTENER UN PRODUCTO POR ID
+// ========================================
+
+export const getProdctById = async (req, res) => {
+  try {
+    // obtener el id
+    // console.log(req.params);
+    //en el router tengo servicios/:id y si tuviera ademas :/cat tambieen estaria
+    const id = req.params.id; // Recogeremos los datos que nos envían en el body desde el front
+    // req.body, req.header...., req.query
+    // llamada a la bd y solicita el servicio por su id
+    // db.servicios.find(_id:id)
+    // si no existo 404
+    // const servicioEncontrado = await Servicio.findById(id);
+
+    // 2. Simulamos una búsqueda en la base de datos
+    const servicioEncontrado = {
+      id: id,
+      nombre: "Desarrollo web",
+      precio: 150
+    };
+
+    // 3. Simulamos que no encontramos el servicio
+    if (!servicioEncontrado) {
+      return res.status(404).json({
+        ok: false,
+        msg: "Servicio no encontrado",
+      });
+    }
+
+    // 4. Devolvemos el servicio encontrado
+    res.status(200).json({
+      ok: true,
+      msg: `Has pedido el producto ${id}`,
+      data: servicioEncontrado
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      msg: "Error del servidor",
+    });
+  }
+};
+
+// ========================================
+// CONTROLADOR PARA CREAR productos
+// ========================================
+// 401 si existe comprobar que exista el usuario
+
+/*
+ if (!true){
+      res.status(401).json({
+      ok: true,
+      msg: "el servicio ya exite",
+    })
+  }
+*/
+
+export const postProduct = async (req, res) => {
+  try {
+    // console.log(req.body);
+    // const servicio = req.body;
+    // llamo a base de datos y crear nuevo servicios con los datos del objeto
+    res.status(201).json({
+      ok: true,
+      msg: "Has hecho un post de un producto",
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: true,
+      msg: "error del servidor siempre 500",
+    });
+  }
+};
+
+// ========================================
+// CONTROLADOR PARA ACTUALIZAR UN PROCUCTO
+// ========================================
+
+export const updateProductById = async (req, res) => {
+  try {
+    // obtener el id
+    // console.log(req.params);
+
+    //en el router tengo servicios/:id y si tuviera ademas :/cat tambieen estaria
+    const id = req.params.id; // el id que se pase en la url de postma
+    // Recogeremos los datos que nos envía el front en el body algo asi ya lo veremos
+    // const { id, nombre } = req.body;
+
+    // para caputrar querys seria con req.query ?page=1&
+
+    res.status(200).json({
+      ok: true,
+      msg: `Has actualizado el producto ${id}`,
+    });
+    // throw error // para comprobar que entra en el catch
+  } catch (error) {
+    res.status(500).json({
+      ok: true,
+      msg: "error del servidor siempre 500",
+    });
+  }
+};
+
+// ========================================
+// CONTROLADOR PARA BORRAR UN PRODUCTO
+// ========================================
+
+export const deleteProductById = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    res.status(200).json({
+      ok: true,
+      msg: `Has borrado el producto ${id}`,
+    });
+    // throw error // para comprobar que entra en el catch
+  } catch (error) {
+    res.status(500).json({
+      ok: true,
+      msg: "error del servidor siempre 500",
+    });
+  }
+};
+
+// ========================================
+// CONTROLADOR PARA OBTENER SERVICIOS
+// ========================================
+
+// Esta función se ejecuta cuando recibimos una petición de tipo GET a la ruta "/servicios".
+// Indicamos que la operación ha sido correcta con 200 y el mensaje y el array de servicios.
+
+export const getServices = async (req, res) => {
+  try {
+    res.status(200).json({
+      ok: true,
+      msg: "Esto es servicios",
+      servicios: [
+        {
+          id: 1,
+          nombre: "Servicio 1",
+        },
+        {
+          id: 2,
+          nombre: "Servicio 2",
+        },
+      ],
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: true,
+      msg: "error del servidor siempre 500",
+    });
+  }
+};
+
+// ========================================
+// CONTROLADOR PARA CREAR servicios
+// ========================================
+
+// Esta función se ejecuta cuando recibimos una petición del front de tipo
+// POST a la ruta "/servicio".
+// Normalmente utilizaremos POST para enviar información desde el cliente al servidor y crear un nuevo producto.
+// Enviamos el código de estado HTTP 201 (Created). Este código indica que se ha creado un recurso.
+// tambien habria que comprobar si existe el servicio y entonces no dejara crearlo devolviendo 401 etc...
+export const postService = async (req, res) => {
+  try {
+    res.status(201).json({
+      ok: true,
+      msg: "Has hecho un post de un servicio",
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: true,
+      msg: "error del servidor siempre 500",
+    });
+  }
+};
+
+// ========================================
+// CONTROLADOR PARA OBTENER un SERVICIO
+// ========================================
+// Recogemos el ID de la URL y otros parametros como nombre del servicio etc
+// es decir requiero esos datos que me los manda el front y iran en el parmetro req
+// y estos datos vendran en un json
+// {id:1, nombre: serviciotal}, que iran en el cuerpo
+export const getServiceByid = async (req, res) => {
+  try {
+    const id = req.params.id; 
+
+    res.status(200).json({
+      ok: true,
+      msg: `Has pedido el servicio ${id}`,
+    });
+    // throw error // para comprobar que entra en el catch
+  } catch (error) {
+    res.status(500).json({
+      ok: true,
+      msg: "error del servidor siempre 500",
+    });
+  }
+};
+
+// ========================================
+// CONTROLADOR PARA actualizar un SERVICIO
+// ========================================
+
+export const updateServiceById = async (req, res) => {
+  try {
+    const id = req.params.id; 
+
+    res.status(200).json({
+      ok: true,
+      msg: `Has actualizado el servicio ${id}`,
+    });
+    // throw error // para comprobar que entra en el catch
+  } catch (error) {
+    res.status(500).json({
+      ok: true,
+      msg: "error del servidor siempre 500",
+    });
+  }
+};
+
+// ========================================
+// CONTROLADOR PARA borrar un SERVICIO
+// ========================================
+export const deleteServiceById = async (req, res) => {
+  try {
+    const id = req.params.id; 
+    
+    res.status(200).json({
+      ok: true,
+      msg: `Has borrado el servicio ${id}`,
+    });
+    // throw error // para comprobar que entra en el catch
+  } catch (error) {
+    res.status(500).json({
+      ok: true,
+      msg: "error del servidor siempre 500",
+    });
+  }
+};
