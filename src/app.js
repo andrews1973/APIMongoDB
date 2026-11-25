@@ -18,10 +18,12 @@ import express from "express";
 // Así podemos acceder a ellas mediante process.env. y la import se hace asi
 import "dotenv/config";
 
-import helmet from "helmet"
+import helmet from "helmet" //  añadir cabeceras HTTP de seguridad npm i helmet   
+
 
 // Importamos el archivo que contiene las rutas públicas
 import publicRoutes from "./routes/publicRoutes.js";
+import { dbConnect } from "./config/db-connect.js"; // importa la función dbConnect de mongoose
 
 
 // ========================================
@@ -31,7 +33,7 @@ import publicRoutes from "./routes/publicRoutes.js";
 // Ejecutamos express() para crear nuestra aplicación.
 // La variable app será la encargada de gestionar las peticiones que lleguen a nuestro servidor.
 const app = express();
-app.use (helmet()) // seguridad
+app.use (helmet()) // seguridad usamos helmet
 
 // ========================================
 // 2. CONFIGURAR EL PUERTO
@@ -43,6 +45,12 @@ app.use (helmet()) // seguridad
 // Si PORT no está definido, utilizamos el puerto 3000 como valor alternativo.
 const port = process.env.PORT || 3000;
 
+dbConnect() // Llama a la función importada, la cual devuelve una promesa de db-connect.js
+    .then ((resp)=>{
+        console.log(resp); // Base de datos local conectada correctamente
+    }).catch ((error)=>{
+        console.log(error); //No hay conexion
+    })
 // ========================================
 // 3. CONFIGURAR LOS MIDDLEWARE
 // ========================================

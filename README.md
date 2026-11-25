@@ -14,6 +14,7 @@ npm i
 2 renombra el archivo env.template y susutituye los datos
 ```javascritp
 PORT= 'nombre del puerto'
+URI = URI DE MONGO
 ```
 3 ejecuta en la terminal
 ```bash

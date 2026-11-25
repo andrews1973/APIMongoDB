@@ -1,3 +1,8 @@
+// importamos los modelos servicio y producto
+import { Servicio } from "../models/ServicioModel.js";
+import { Producto } from "../models/ProductoModel.js";
+
+
 // ========================================
 // CONTROLADOR DE LA PÁGINA PRINCIPAL
 // ========================================
@@ -46,7 +51,7 @@ export const getProducts = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      ok: true,
+      ok: false,
       msg: "error del servidor siempre 500",
     });
   }
@@ -58,28 +63,17 @@ export const getProducts = async (req, res) => {
 
 export const getProdctById = async (req, res) => {
   try {
-    // obtener el id
-    // console.log(req.params);
-    //en el router tengo servicios/:id y si tuviera ademas :/cat tambieen estaria
-    const id = req.params.id; // Recogeremos los datos que nos envían en el body desde el front
-    // req.body, req.header...., req.query
-    // llamada a la bd y solicita el servicio por su id
-    // db.servicios.find(_id:id)
-    // si no existo 404
-    // const servicioEncontrado = await Servicio.findById(id);
+    // 1. Recogemos el ID de la URL
+    const id = req.params.id;
 
-    // 2. Simulamos una búsqueda en la base de datos
-    const servicioEncontrado = {
-      id: id,
-      nombre: "Desarrollo web",
-      precio: 150
-    };
+    // 2. Buscamos el servicio en MongoDB por su ID
+    const productoEncontrado = await Producto.findById(id);
 
-    // 3. Simulamos que no encontramos el servicio
-    if (!servicioEncontrado) {
+    // 3. Comprobamos si existe
+    if (!productoEncontrado) {
       return res.status(404).json({
         ok: false,
-        msg: "Servicio no encontrado",
+        msg: "Producto no encontrado",
       });
     }
 
@@ -87,10 +81,12 @@ export const getProdctById = async (req, res) => {
     res.status(200).json({
       ok: true,
       msg: `Has pedido el producto ${id}`,
-      data: servicioEncontrado
+      data: productoEncontrado,
     });
 
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       ok: false,
       msg: "Error del servidor",
@@ -105,26 +101,48 @@ export const getProdctById = async (req, res) => {
 
 /*
  if (!true){
-      res.status(401).json({
+      return res.status(401).json({
       ok: true,
       msg: "el servicio ya exite",
     })
   }
 */
 
-export const postProduct = async (req, res) => {
+export const createProduct = async (req, res) => {
   try {
-    // console.log(req.body);
-    // const servicio = req.body;
+    console.log(req.body);
+    const nuevoProductoEnviado = req.body;
+
+    // entre la req y la res puedo hacer un midelware para validar los datos
+
     // llamo a base de datos y crear nuevo servicios con los datos del objeto
+    // findOne devuelve un resgistro o null find me devolvia todos
+
+    // accedemos a sus metodos miramos la documentacion findOne
+
+    const existe = await Producto.findOne({ nombre: nuevoProductoEnviado.nombre });
+
+    if (existe) {
+      return res.status(409).json({ // sale del programa con el return
+        ok: false,
+        msg: "el producto ya exite",
+      });
+    }
+    // creamos el producto
+    const producto = await Producto.create(nuevoProductoEnviado); // devuelve una promesa hay que poner await
+
     res.status(201).json({
       ok: true,
-      msg: "Has hecho un post de un producto",
+      msg: "Has creado un producto",
+      producto, // si se llama la propiedad igual a la clave no hace falta ponerla
     });
+
   } catch (error) {
-    res.status(500).json({
-      ok: true,
+    console.log(error);
+    return res.status(500).json({
+      ok: false,
       msg: "error del servidor siempre 500",
+      error
     });
   }
 };
@@ -142,8 +160,9 @@ export const updateProductById = async (req, res) => {
     const id = req.params.id; // el id que se pase en la url de postma
     // Recogeremos los datos que nos envía el front en el body algo asi ya lo veremos
     // const { id, nombre } = req.body;
-
+    const productoActualizar = req.body;
     // para caputrar querys seria con req.query ?page=1&
+    // necesito comprobar si existe ese producto
 
     res.status(200).json({
       ok: true,
@@ -152,7 +171,7 @@ export const updateProductById = async (req, res) => {
     // throw error // para comprobar que entra en el catch
   } catch (error) {
     res.status(500).json({
-      ok: true,
+      ok: false,
       msg: "error del servidor siempre 500",
     });
   }
@@ -173,7 +192,7 @@ export const deleteProductById = async (req, res) => {
     // throw error // para comprobar que entra en el catch
   } catch (error) {
     res.status(500).json({
-      ok: true,
+      ok: false,
       msg: "error del servidor siempre 500",
     });
   }
@@ -204,7 +223,7 @@ export const getServices = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      ok: true,
+      ok: false,
       msg: "error del servidor siempre 500",
     });
   }
@@ -219,40 +238,101 @@ export const getServices = async (req, res) => {
 // Normalmente utilizaremos POST para enviar información desde el cliente al servidor y crear un nuevo producto.
 // Enviamos el código de estado HTTP 201 (Created). Este código indica que se ha creado un recurso.
 // tambien habria que comprobar si existe el servicio y entonces no dejara crearlo devolviendo 401 etc...
-export const postService = async (req, res) => {
+export const createService = async (req, res) => {
   try {
+    console.log(req.body);
+
+    // 1. Recogemos los datos enviados
+    const nuevoServicioEnviado = req.body;
+
+    // 2. Comprobamos que el nombre no esté vacío
+    if (!nuevoServicioEnviado.nombre) {
+      return res.status(400).json({
+        ok: false,
+        msg: "El nombre del servicio es obligatorio"
+      });
+    }
+
+    // 3. Comprobamos si el servicio ya existe
+    // findOne(): busca un único documento que cumpla la condición. Si no lo encuentra devuelve null
+    const existe = await Servicio.findOne({nombre: nuevoServicioEnviado.nombre});
+
+    if (existe) {
+      return res.status(409).json({
+        ok: false,
+        msg: "El servicio ya existe"
+      });
+    }
+
+    // 4. Creamos el servicio
+    const servicio = await Servicio.create(nuevoServicioEnviado);
+
+    // 5. Devolvemos el servicio creado
     res.status(201).json({
       ok: true,
-      msg: "Has hecho un post de un servicio",
+      msg: "Has creado un servicio",
+      servicio
     });
+
   } catch (error) {
-    res.status(500).json({
-      ok: true,
-      msg: "error del servidor siempre 500",
+    console.log(error);
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        ok: false,
+        msg: "error de clave duplicada en MongoDB, El servicio ya existe"
+      });
+    }
+
+    return res.status(500).json({
+      ok: false,
+      msg: "Error interno del servidor"
     });
   }
 };
 
+/* 
+findOne()	Comprobar previamente si existe.
+error.code === 11000	Evitar duplicados incluso con peticiones simultáneas donde una ser crea y la otra no. 
+Por eso necesitamos capturarlo en el catch.
+unique: true	Garantizar la unicidad en MongoDB. 
+MongoDB tiene el índice único creado por unique: true, así que solo permite guardar uno
+*/
+
 // ========================================
 // CONTROLADOR PARA OBTENER un SERVICIO
 // ========================================
-// Recogemos el ID de la URL y otros parametros como nombre del servicio etc
+// Recogemos el ID de la URL 
 // es decir requiero esos datos que me los manda el front y iran en el parmetro req
-// y estos datos vendran en un json
-// {id:1, nombre: serviciotal}, que iran en el cuerpo
 export const getServiceByid = async (req, res) => {
   try {
-    const id = req.params.id; 
+    // 1. Recogemos el ID de la URL
+    const id = req.params.id;
 
+    // 2. Buscamos el servicio en MongoDB por su ID
+    const servicioEncontrado = await Servicio.findById(id);
+
+    // 3. Comprobamos si existe
+    if (!servicioEncontrado) {
+      return res.status(404).json({
+        ok: false,
+        msg: "Servicio no encontrado",
+      });
+    }
+
+    // 4. Devolvemos el servicio encontrado
     res.status(200).json({
       ok: true,
-      msg: `Has pedido el servicio ${id}`,
+      msg: `Has pedido el producto ${id}`,
+      data: servicioEncontrado,
     });
-    // throw error // para comprobar que entra en el catch
+
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
-      ok: true,
-      msg: "error del servidor siempre 500",
+      ok: false,
+      msg: "Error del servidor",
     });
   }
 };
@@ -263,7 +343,7 @@ export const getServiceByid = async (req, res) => {
 
 export const updateServiceById = async (req, res) => {
   try {
-    const id = req.params.id; 
+    const id = req.params.id;
 
     res.status(200).json({
       ok: true,
@@ -272,7 +352,7 @@ export const updateServiceById = async (req, res) => {
     // throw error // para comprobar que entra en el catch
   } catch (error) {
     res.status(500).json({
-      ok: true,
+      ok: false,
       msg: "error del servidor siempre 500",
     });
   }
@@ -283,8 +363,8 @@ export const updateServiceById = async (req, res) => {
 // ========================================
 export const deleteServiceById = async (req, res) => {
   try {
-    const id = req.params.id; 
-    
+    const id = req.params.id;
+
     res.status(200).json({
       ok: true,
       msg: `Has borrado el servicio ${id}`,
@@ -292,8 +372,25 @@ export const deleteServiceById = async (req, res) => {
     // throw error // para comprobar que entra en el catch
   } catch (error) {
     res.status(500).json({
-      ok: true,
+      ok: false,
       msg: "error del servidor siempre 500",
     });
   }
 };
+
+/* querys
+Model.deleteMany()
+Model.deleteOne()
+Model.find()
+Model.findById()
+Model.findByIdAndDelete()
+Model.findByIdAndRemove()
+Model.findByIdAndUpdate()
+Model.findOne()
+Model.findOneAndDelete()
+Model.findOneAndReplace()
+Model.findOneAndUpdate()
+Model.replaceOne()
+Model.updateMany()
+Model.updateOne() 
+*/
