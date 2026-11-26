@@ -20,11 +20,11 @@ import "dotenv/config";
 
 import helmet from "helmet" //  añadir cabeceras HTTP de seguridad npm i helmet   
 
-
-// Importamos el archivo que contiene las rutas públicas
-import publicRoutes from "./routes/publicRoutes.js";
 import { dbConnect } from "./config/db-connect.js"; // importa la función dbConnect de mongoose
 
+// Importamos el archivo que contiene las rutas públicas
+import productosRoutes from "./routes/productosRoutes.js";
+import serviciosRoutes from "./routes/serviciosRoutes.js";
 
 // ========================================
 // 1. CREAR LA APLICACIÓN
@@ -88,7 +88,8 @@ app.use(express.json());
 // Cuando llegue una petición a alguna direccion, 
 // Express buscará la ruta correspondiente en publicRoutes.js.
 
-app.use("/", publicRoutes);
+app.use("/api/v1/productos", productosRoutes );
+app.use("/api/v1/servicios", serviciosRoutes );
 
 
 
