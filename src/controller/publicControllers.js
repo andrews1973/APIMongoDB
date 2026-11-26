@@ -1,4 +1,4 @@
-// importamos los modelos servicio y producto
+// importamos los modelos servicio y producto, prodemos utilizar sus metodos
 import { Servicio } from "../models/ServicioModel.js";
 import { Producto } from "../models/ProductoModel.js";
 
@@ -24,38 +24,40 @@ export const getIndex = (req, res) => {
 // ========================================
 // CONTROLADOR PARA OBTENER PRODUCTOS
 // ========================================
-// aqui tambien habra un llamada al base de datos, traeme todos los productos ect
-// habra latencia y por tanto asysc y try catch
 // Esta función se ejecuta cuando recibimos una petición
 // GET a la ruta "/productos" Enviamos una respuesta HTTP 200 (OK).
 // Dentro de .json() como hemos comentado enviamos un objeto JavaScript
 // que Express convierte automáticamente a formato JSON.
 // Es Array con los productos (objetos) que queremos devolver al cliente, procedera de bd
+
 export const getProducts = async (req, res) => {
   try {
+    const productos = await Producto.find(); // si no  encuentra productos devuelve array vacio
+
+    // Comprobamos si el array está vacío
+    if (productos.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        msg: "No hay ningún producto",
+      });
+    }
+
     res.status(200).json({
       ok: true,
-      mesg: "esto es productos",
-      articulos: [
-        {
-          id: 1,
-          nombre: "articulo1",
-          descripcion: "des arti 1",
-        },
-        {
-          id: 2,
-          nombre: "articulo2",
-          descripcion: "des arti 2",
-        },
-      ],
+      msg: "Estos son los productos",
+      productos // devolvemos todos los productos
     });
+
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       ok: false,
-      msg: "error del servidor siempre 500",
+      msg: "Error del servidor",
     });
   }
 };
+
 
 // ========================================
 // CONTROLADOR PARA OBTENER UN PRODUCTO POR ID
@@ -98,15 +100,6 @@ export const getProdctById = async (req, res) => {
 // CONTROLADOR PARA CREAR productos
 // ========================================
 // 401 si existe comprobar que exista el usuario
-
-/*
- if (!true){
-      return res.status(401).json({
-      ok: true,
-      msg: "el servicio ya exite",
-    })
-  }
-*/
 
 export const createProduct = async (req, res) => {
   try {
@@ -207,19 +200,19 @@ export const deleteProductById = async (req, res) => {
 
 export const getServices = async (req, res) => {
   try {
+    const servicios = await Servicio.find()
+
+    if (servicios.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        msg: "No hay ningun servicio",
+      });
+    }
+
     res.status(200).json({
       ok: true,
-      msg: "Esto es servicios",
-      servicios: [
-        {
-          id: 1,
-          nombre: "Servicio 1",
-        },
-        {
-          id: 2,
-          nombre: "Servicio 2",
-        },
-      ],
+      msg: "Servicios encontrados",
+      servicios
     });
   } catch (error) {
     res.status(500).json({
@@ -245,7 +238,7 @@ export const createService = async (req, res) => {
     // 1. Recogemos los datos enviados
     const nuevoServicioEnviado = req.body;
 
-    // 2. Comprobamos que el nombre no esté vacío
+    // 2. Comprobamos que el nombre no esté vacío, en los datos que recibimos del front
     if (!nuevoServicioEnviado.nombre) {
       return res.status(400).json({
         ok: false,
@@ -260,7 +253,7 @@ export const createService = async (req, res) => {
     if (existe) {
       return res.status(409).json({
         ok: false,
-        msg: "El servicio ya existe"
+        msg: "El servicio ya existe, no ha sido creado"
       });
     }
 
@@ -381,12 +374,12 @@ export const deleteServiceById = async (req, res) => {
 /* querys
 Model.deleteMany()
 Model.deleteOne()
-Model.find()
-Model.findById()
+Model.find() // para read y mostrar todos si no encuentra devuelve array vacio
+Model.findById() // para mostrar uno
 Model.findByIdAndDelete()
 Model.findByIdAndRemove()
 Model.findByIdAndUpdate()
-Model.findOne()
+Model.findOne() para buscar si existe cuando vayas a crear uno, devuelve uno o null
 Model.findOneAndDelete()
 Model.findOneAndReplace()
 Model.findOneAndUpdate()
