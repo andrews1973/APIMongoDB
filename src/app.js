@@ -66,7 +66,7 @@ dbConnect() // Llama a la función importada, la cual devuelve una promesa de db
 // puedan acceder a los datos recibidos.
 
 // para formularios application xxx-form-unrlencoded
-// app.use(express.urlencoded())
+app.use(express.urlencoded())
 // parse aplication json
 
 app.use(express.json());

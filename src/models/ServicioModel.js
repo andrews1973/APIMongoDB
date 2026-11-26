@@ -10,14 +10,10 @@ import { Schema, model } from "mongoose";
 // que necesita un objeto, este va a contener las propiedades del modelo
 
 const ServicioSchema = new Schema({
-    id:{
-        type:Number,
-        unique: true,
-    },
     nombre:{
         type: String,
         required: true, // Campo obligatorio
-        unique: [true, "El nombre es obligatorio"],
+        unique:true,
         trim: true // Elimina espacios en blanco al inicio y al final
     },
     descripcion:{

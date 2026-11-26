@@ -234,52 +234,38 @@ export const getServices = async (req, res) => {
 export const createService = async (req, res) => {
   try {
     console.log(req.body);
-
-    // 1. Recogemos los datos enviados
     const nuevoServicioEnviado = req.body;
 
-    // 2. Comprobamos que el nombre no esté vacío, en los datos que recibimos del front
-    if (!nuevoServicioEnviado.nombre) {
-      return res.status(400).json({
-        ok: false,
-        msg: "El nombre del servicio es obligatorio"
-      });
-    }
+    // entre la req y la res puedo hacer un midelware para validar los datos
 
-    // 3. Comprobamos si el servicio ya existe
-    // findOne(): busca un único documento que cumpla la condición. Si no lo encuentra devuelve null
-    const existe = await Servicio.findOne({nombre: nuevoServicioEnviado.nombre});
+    // llamo a base de datos y crear nuevo servicios con los datos del objeto
+    // findOne devuelve un resgistro o null find me devolvia todos
+
+    // accedemos a sus metodos miramos la documentacion findOne
+
+    const existe = await Producto.findOne({ nombre: nuevoServicioEnviado.nombre });
 
     if (existe) {
-      return res.status(409).json({
+      return res.status(409).json({ // sale del programa con el return
         ok: false,
-        msg: "El servicio ya existe, no ha sido creado"
+        msg: "el servicio ya exite",
       });
     }
+    // creamos el producto
+    const producto = await Producto.create(nuevoServicioEnviado); // devuelve una promesa hay que poner await
 
-    // 4. Creamos el servicio
-    const servicio = await Servicio.create(nuevoServicioEnviado);
-
-    // 5. Devolvemos el servicio creado
     res.status(201).json({
       ok: true,
       msg: "Has creado un servicio",
-      servicio
+      producto, // si se llama la propiedad igual a la clave no hace falta ponerla
     });
 
   } catch (error) {
     console.log(error);
-
-    if (error.code === 11000) {
-      return res.status(409).json({
-        ok: false,
-        msg: "error de clave duplicada en MongoDB, El servicio ya existe"
-      });
-    }
-
     return res.status(500).json({
       ok: false,
-      msg: "Error interno del servidor"
+      msg: "error del servidor siempre 500",
+      error
     });
   }
 };
